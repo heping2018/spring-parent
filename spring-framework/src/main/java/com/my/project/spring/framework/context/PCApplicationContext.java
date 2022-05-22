@@ -1,5 +1,9 @@
 package com.my.project.spring.framework.context;
 
+import com.my.project.spring.aop.framework.DefaultAopProxyFactory;
+import com.my.project.spring.aop.framework.DefaultProxyFactory;
+import com.my.project.spring.aop.framework.ProxyConfig;
+import com.my.project.spring.aop.framework.support.AdvisedSupport;
 import com.my.project.spring.framework.annotation.PCAutowire;
 import com.my.project.spring.framework.annotation.PCService;
 import com.my.project.spring.framework.annotation.Value;
@@ -45,6 +49,8 @@ public class PCApplicationContext extends PCDefaultListableBeanFactory implement
 
     private StandarEnvironment standarEnvironment;
 
+    private DefaultProxyFactory defaultProxyFactory;
+
 
     public PCApplicationContext(String... configLocations){
         this.configLocations = configLocations;
@@ -82,6 +88,7 @@ public class PCApplicationContext extends PCDefaultListableBeanFactory implement
         this.applicationEventPublisher = new DefalutPCApplicationEventPublisher();
         earlyEvent.add(new PrepareApplicationEvent(this));
         this.setStandarEnvironment(getDefaultEnvironment());
+        this.defaultProxyFactory = new DefaultProxyFactory(new DefaultAopProxyFactory());
 
     }
 
@@ -211,13 +218,30 @@ public class PCApplicationContext extends PCDefaultListableBeanFactory implement
             } else {
                 Class<?> clazz = Class.forName(className);
                 instance = clazz.newInstance();
-
+                AdvisedSupport config = instantionAopConfig(beanDefinition);
+                if(config.pointCutMatch()){
+                    instance = createProxy(config);
+                }
                 this.factoryBeanObjectCache.put(beanDefinition.getBeanClassNanme(),instance);
             }
         }catch (Exception e){
             e.printStackTrace();
         }
         return instance;
+    }
+
+    private Object createProxy(AdvisedSupport config) {
+       return defaultProxyFactory.getProxy(config);
+    }
+
+    private AdvisedSupport instantionAopConfig(PCBeanDefinition beanDefinition) {
+        ProxyConfig config = new ProxyConfig();
+        config.setPonitCut(reader.getConfig().getProperty("pointCut"));
+        config.setAspectClass(reader.getConfig().getProperty("aspectClass"));
+        config.setAspectBefore(reader.getConfig().getProperty("aspectBefore"));
+        config.setAspectAfter(reader.getConfig().getProperty("aspectAfter"));
+        config.setAspectAfterThrow(reader.getConfig().getProperty("aspectAfterThrow"));
+        return new AdvisedSupport(config);
     }
 
     @Override

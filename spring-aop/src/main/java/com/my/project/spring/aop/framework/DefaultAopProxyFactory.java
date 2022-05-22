@@ -1,5 +1,9 @@
 package com.my.project.spring.aop.framework;
 
+import com.my.project.spring.aop.framework.support.AdvisedSupport;
+
+import java.lang.reflect.Proxy;
+
 /**
  * @author 86187
  * @description <TODO description class purpose>
@@ -7,7 +11,13 @@ package com.my.project.spring.aop.framework;
  **/
 public class DefaultAopProxyFactory implements AopProxyFactory {
     @Override
-    public AopProxy createAopProxy(ProxyConfig config) {
-        return null;
+    public AopProxy createAopProxy(AdvisedSupport config) {
+        if (config.getTargetClass() != null) {
+            if (config.getTargetClass().isInterface() || Proxy.isProxyClass(config.getTargetClass())) {
+                return new JDKDynamicAopProxy(config);
+            }
+            return new CglibAopProxy(config);
+        }
+        return new JDKDynamicAopProxy(config);
     }
 }

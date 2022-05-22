@@ -1,5 +1,7 @@
 package com.my.project.spring.aop.framework;
 
+import com.my.project.spring.aop.framework.support.AdvisedSupport;
+
 /**
  * @author 86187
  * @description <TODO description class purpose>
@@ -7,5 +9,5 @@ package com.my.project.spring.aop.framework;
  **/
 public abstract class AbstractProxyFactory implements ProxyFactory {
 
-    protected abstract AopProxy createAopProxy(ProxyConfig config);
+    protected abstract AopProxy createAopProxy(AdvisedSupport config);
 }

@@ -1,6 +1,9 @@
 package com.my.project.spring.aop.framework.support;
 
 import com.my.project.spring.aop.framework.ProxyConfig;
+import com.my.project.spring.aop.framework.advice.AfterThrowingAdvice;
+import com.my.project.spring.aop.framework.advice.MethodAfterReturningAdvice;
+import com.my.project.spring.aop.framework.advice.MethodBeforeAdvice;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -48,15 +51,20 @@ public class AdvisedSupport {
         return ponitCutClassPattern.matcher(this.targetClass.toString()).matches();
     }
 
-    private void parse(){
-        String pointCut = proxyConfig.getPonitCut().replaceAll("\\.","\\\\.")
-                .replaceAll("\\\\.\\*",".*")
-                .replaceAll("\\(","\\\\(")
-                .replaceAll("\\)","\\\\)");
+    private void parse() throws Exception {
+        String pointCut = proxyConfig.getPonitCut();
+//                .replaceAll("\\.","\\\\.")
+//                .replaceAll("\\\\.\\*",".*")
+//                .replaceAll("\\(","\\\\(")
+//                .replaceAll("\\)","\\\\)");
 
-        String pointCutForClass = pointCut.substring(0,pointCut.lastIndexOf("\\(") - 4);
+        String pointCutForClass = pointCut.substring(0,pointCut.lastIndexOf(")") + 1);
         ponitCutClassPattern =
                 Pattern.compile("class " + pointCutForClass.substring(pointCutForClass.lastIndexOf(" ") + 1));
+
+        Pattern pattern = Pattern.compile(pointCut);
+
+        methodCache = new HashMap<>();
         Class aspectClass = Class.forName(proxyConfig.getAspectClass());
         Map<String,Method> aspectMethods = new HashMap<>();
         for (Method m : aspectClass.getMethods()){
@@ -67,12 +75,23 @@ public class AdvisedSupport {
             if(methodString.contains("throws")){
                 methodString = methodString.substring(0,methodString.lastIndexOf("throws")).trim();
             }
-            Matcher matcher = ponitCutClassPattern.matcher(methodString);
+            methodString = methodString.substring(methodString.indexOf(" ")+1);
+            methodString = methodString.substring(methodString.indexOf(" ")+1);
+            Matcher matcher = pattern.matcher(methodString);
             if(matcher.matches()){
               List<Object> advices = new LinkedList<>();
               if(!(proxyConfig.getAspectBefore() == null || "".equals(proxyConfig.getAspectBefore().trim()))){
-                  advices.add(new )
+                  advices.add(new MethodBeforeAdvice(aspectMethods.get(proxyConfig.getAspectBefore()),aspectClass.newInstance()));
               }
+              if(!(proxyConfig.getAspectAfter() == null || "".equals(proxyConfig.getAspectAfter().trim()))){
+                  advices.add(new MethodAfterReturningAdvice(aspectMethods.get(proxyConfig.getAspectAfter()),aspectClass.newInstance()));
+              }
+              if(!(proxyConfig.getAspectAfterThrow() == null || "".equals(proxyConfig.getAspectAfterThrow().trim()))){
+                  AfterThrowingAdvice afterThrowingAdvice = new AfterThrowingAdvice(aspectMethods.get(proxyConfig.getAspectAfter()),aspectClass.newInstance());
+                  afterThrowingAdvice.setThrowingName(proxyConfig.getAspectAfterThrowingName());
+                  advices.add(afterThrowingAdvice);
+              }
+              methodCache.put(m,advices);
             }
         }
     }
@@ -83,6 +102,11 @@ public class AdvisedSupport {
 
     public void setTargetClass(Class targetClass) {
         this.targetClass = targetClass;
+        try {
+            parse();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public Object getTarget() {

@@ -1,5 +1,7 @@
 package com.my.project.spring.aop.framework;
 
+import com.my.project.spring.aop.framework.support.AdvisedSupport;
+
 /**
  * @author 86187
  * @description <TODO description class purpose>
@@ -7,6 +9,6 @@ package com.my.project.spring.aop.framework;
  **/
 public interface ProxyFactory {
 
-    Object getProxy(ProxyConfig config);
+    Object getProxy(AdvisedSupport config);
 
 }

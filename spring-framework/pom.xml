@@ -19,6 +19,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.my.project.spring</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>

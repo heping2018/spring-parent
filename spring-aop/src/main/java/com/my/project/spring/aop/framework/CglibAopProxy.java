@@ -1,5 +1,7 @@
 package com.my.project.spring.aop.framework;
 
+import com.my.project.spring.aop.framework.support.AdvisedSupport;
+
 /**
  * @author 86187
  * @description <TODO description class purpose>
@@ -7,11 +9,16 @@ package com.my.project.spring.aop.framework;
  **/
 public class CglibAopProxy implements AopProxy{
 
-    private ProxyConfig proxyConfig;
+    private AdvisedSupport proxyConfig;
+
+
+    public CglibAopProxy(AdvisedSupport proxyConfig) {
+        this.proxyConfig = proxyConfig;
+    }
 
     @Override
     public Object getProxy() {
-        return ;
+        return null;
     }
 
     @Override

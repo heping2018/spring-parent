@@ -1,5 +1,7 @@
 package com.my.project.spring.aop.framework;
 
+import com.my.project.spring.aop.framework.support.AdvisedSupport;
+
 /**
  * @author 86187
  * @description <TODO description class purpose>
@@ -8,13 +10,18 @@ package com.my.project.spring.aop.framework;
 public class DefaultProxyFactory extends AbstractProxyFactory {
 
     private AopProxyFactory aopProxyFactory;
+
+    public DefaultProxyFactory(AopProxyFactory aopProxyFactory) {
+        this.aopProxyFactory = aopProxyFactory;
+    }
+
     @Override
-    protected AopProxy createAopProxy(ProxyConfig config) {
+    protected AopProxy createAopProxy(AdvisedSupport config) {
         return aopProxyFactory.createAopProxy(config);
     }
 
     @Override
-    public Object getProxy(ProxyConfig config) {
-        return aopProxyFactory.createAopProxy(config);
+    public Object getProxy(AdvisedSupport config) {
+        return createAopProxy(config).getProxy();
     }
 }

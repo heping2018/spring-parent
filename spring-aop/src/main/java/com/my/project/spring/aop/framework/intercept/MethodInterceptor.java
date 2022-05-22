@@ -6,5 +6,5 @@ package com.my.project.spring.aop.framework.intercept;
  * @create 2022/5/21 20:51
  **/
 public interface MethodInterceptor {
-    Object invoke(MethodInvocation methodInvocation);
+    Object invoke(MethodInvocation methodInvocation) throws Throwable;
 }
